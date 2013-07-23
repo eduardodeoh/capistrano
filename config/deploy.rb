@@ -15,12 +15,8 @@ set :default_environment, {
   'RBENV_VERSION' => '2.0.0-p247'
 }
 
-# App name
-set :application, "plazap"
-
-#IP or name of VPS
-#set :server_host, "www.xxxx.com.br"
-set :server_host, "198.199.85.xxx"
+#Load Capistrano General Settings
+load "config/capistrano/settings"
 
 #Load capistrano recipes....
 load "config/capistrano/recipes/helpers/methods"
@@ -61,9 +57,6 @@ server server_host, :app, :web, :db, :primary => true
 # Application environment
 set :rails_env, :production
 
-# Set deployer,SSH user
-set :user, "deploy"
-
 # Run commands as sudoer ?
 set :use_sudo, false
 
@@ -72,13 +65,6 @@ set :port, 22
 
 #Set Rails Apps Directory
 set :rails_dir, "/var/www/rails"
-
-# Deploy using git:
-set :git_user, "eduardodeoh"
-set :git_repo_name, "xxx"
-set :scm, "git"
-set :repository,  "git@github.com:#{git_user}/#{git_repo_name}.git"
-set :branch, "master"
 
 # Must be set for the password prompt from git to work
 default_run_options[:pty] = true
