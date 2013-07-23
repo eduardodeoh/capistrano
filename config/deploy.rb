@@ -1,0 +1,110 @@
+#Main Capistrano Howto
+#https://gist.github.com/jrochkind/2161449
+
+# Automatic "bundle install" after deploy
+require 'bundler/capistrano'
+
+#Configs for Capistrano + Rbenv
+# http://henriksjokvist.net/archive/2012/2/deploying-with-rbenv-and-capistrano/
+#http://shapeshed.com/using-rbenv-to-manage-rubies/
+#https://github.com/sstephenson/rbenv/wiki/Deploying-with-rbenv
+#https://github.com/sstephenson/rbenv/wiki/ruby-local-exec
+set :bundle_flags, "--deployment --quiet --binstubs"
+set :default_environment, {
+  'PATH' => "$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH",
+  'RBENV_VERSION' => '2.0.0-p247'
+}
+
+# App name
+set :application, "plazap"
+
+#IP or name of VPS
+#set :server_host, "www.xxxx.com.br"
+set :server_host, "198.199.85.xxx"
+
+#Load capistrano recipes....
+load "config/capistrano/recipes/helpers/methods"
+load "config/capistrano/recipes/vars/database"
+load "config/capistrano/recipes/vars/logrotate"
+load "config/capistrano/recipes/vars/monit"
+load "config/capistrano/recipes/vars/nginx"
+#load "config/capistrano/recipes/vars/secret_token"
+load "config/capistrano/recipes/vars/unicorn"
+load "config/capistrano/recipes/base"
+load "config/capistrano/recipes/ssh_agent"
+load "config/capistrano/recipes/rbenv_vars"
+load "config/capistrano/recipes/database"
+##load "config/capistrano/recipes/secret_token"
+load "config/capistrano/recipes/nginx"
+load "config/capistrano/recipes/unicorn"
+load "config/capistrano/recipes/logrotate"
+load "config/capistrano/recipes/monit"
+#Uncomment #load 'deploy/assets' in Capfile
+#load "config/capistrano/recipes/speed_up_assets"
+#Pre-compile assets locally instead on vps server
+load "config/capistrano/recipes/compile_assets_locally"
+
+
+#https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy.rb#L53
+set :shared_children,   %w(public/system log tmp/pids tmp/sockets )
+#https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy/assets.rb#L11
+set :normalize_asset_timestamps, true
+
+# We have all components of the app on the same server
+server server_host, :app, :web, :db, :primary => true
+
+#In situation having multiple servers
+#role :web, "192.241.194.15"
+#role :app, "192.241.194.15"
+#role :db, "192.241.194.15", primary: true #Primary database server for migrations
+
+# Application environment
+set :rails_env, :production
+
+# Set deployer,SSH user
+set :user, "deploy"
+
+# Run commands as sudoer ?
+set :use_sudo, false
+
+# the ssh port
+set :port, 22
+
+#Set Rails Apps Directory
+set :rails_dir, "/var/www/rails"
+
+# Deploy using git:
+set :git_user, "eduardodeoh"
+set :git_repo_name, "xxx"
+set :scm, "git"
+set :repository,  "git@github.com:#{git_user}/#{git_repo_name}.git"
+set :branch, "master"
+
+# Must be set for the password prompt from git to work
+default_run_options[:pty] = true
+
+#Capistrano forward my private keys for git
+ssh_options[:forward_agent] = true
+
+#Default shell
+#default_run_options[:shell] = "/bin/bash"
+
+# Checkout, compress and send a local copy
+# the application deployment path
+set :deploy_via, :remote_cache
+set :deploy_to, "#{rails_dir}/#{application}"
+
+# how many releases should be kept in releases directory
+set :keep_releases, 3
+
+#Check migrations everty deploy
+after 'deploy:update_code', 'deploy:migrate'
+
+# Clean-up old releases
+after "deploy", "deploy:cleanup"
+
+#ansible manages server bootstrap
+#rbenv manages rubies
+#bundler manages gems
+#capistrano manages deployments
+#monit monitors processes

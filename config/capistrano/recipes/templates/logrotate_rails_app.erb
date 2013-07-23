@@ -1,0 +1,10 @@
+<%= logrotate_rails_app_log %> {
+  daily
+  missingok
+  rotate <%= logrotate_rails_app_period %>
+  dateext
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}
