@@ -23,4 +23,4 @@ set :db_pass, "xxxxx"
 #Monit alert email
 set :monit_alert_email, "xxxxx@gmail.com"
 
-#INSERT YOUR VARS HERE (.rbenv-vars/.env etc...)
+#INSERT YOUR VARS HERE (for .rbenv-vars or .env file) and config/capistrano/recipes/templates/{rbenv_vars,dotenv}.erb
