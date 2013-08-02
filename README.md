@@ -7,7 +7,7 @@ Capistrano recipes for Rails Apps
 
 2 - git clone https://github.com/eduardodeoh/capistrano deploy
 
-3 - check settings file - capistrano/settings.rb
+3 - check settings file - config/capistrano/settings.rb
 
 4 - cd your_rails_app; ln -s deploy/Capfile;
 
