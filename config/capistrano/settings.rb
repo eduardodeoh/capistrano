@@ -23,4 +23,7 @@ set :db_pass, "xxxxx"
 #Monit alert email
 set :monit_alert_email, "xxxxx@gmail.com"
 
+#Nginx server name
+set :nginx_server_name, "www.xxx.com"
+
 #INSERT YOUR VARS HERE (.rbenv-vars/.env etc...)
