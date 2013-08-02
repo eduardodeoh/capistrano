@@ -28,7 +28,13 @@ load "config/capistrano/recipes/vars/nginx"
 load "config/capistrano/recipes/vars/unicorn"
 load "config/capistrano/recipes/base"
 load "config/capistrano/recipes/ssh_agent"
-load "config/capistrano/recipes/rbenv_vars"
+
+#Using vars file via gem dotenv-rails
+load "config/capistrano/recipes/dotenv"
+
+#Using vars file via rbenv-vars
+#load "config/capistrano/recipes/rbenv_vars"
+
 load "config/capistrano/recipes/database"
 ##load "config/capistrano/recipes/secret_token"
 load "config/capistrano/recipes/nginx"
