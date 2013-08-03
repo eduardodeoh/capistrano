@@ -24,6 +24,6 @@ set :db_pass, "xxxxx"
 set :monit_alert_email, "xxxxx@gmail.com"
 
 #Nginx server name
-set :nginx_server_name, "www.xxx.com"
+set :nginx_domain_name, "www.xxx.com"
 
 #INSERT YOUR VARS HERE (for .rbenv-vars or .env file) and config/capistrano/recipes/templates/{rbenv_vars,dotenv}.erb

@@ -2,10 +2,17 @@ upstream unicorn_<%= application %> {
   server unix:<%= unicorn_socket %> fail_timeout=0;
 }
 
+
+server {
+  server_name <%= nginx_domain_name %>;
+  return 301 $scheme://www.<%= nginx_domain_name %>$request_uri;
+}
+
+
 server {
   #listen 80 default deferred;
   listen 80;
-  server_name <%= nginx_server_name %>;
+  server_name www.<%= nginx_domain_name %>;
   root <%= current_path %>/public;
   access_log  /var/log/nginx/<%= application %>_access.log;
   error_log /var/log/nginx/<%= application %>_error.log;
