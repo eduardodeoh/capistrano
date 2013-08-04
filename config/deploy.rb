@@ -1,4 +1,5 @@
 #Main Capistrano Howto
+#http://robmclarty.com/blog/how-to-deploy-a-rails-4-app-with-git-and-capistrano
 #https://gist.github.com/jrochkind/2161449
 #https://help.github.com/articles/deploying-with-capistrano
 #https://github.com/capistrano/capistrano/wiki/Capistrano-Tasks
@@ -6,12 +7,12 @@
 # Automatic "bundle install" after deploy
 require 'bundler/capistrano'
 
-#Configs for Capistrano + Rbenv
-# http://henriksjokvist.net/archive/2012/2/deploying-with-rbenv-and-capistrano/
-#http://shapeshed.com/using-rbenv-to-manage-rubies/
-#https://github.com/sstephenson/rbenv/wiki/Deploying-with-rbenv
-#https://github.com/sstephenson/rbenv/wiki/ruby-local-exec
-set :bundle_flags, "--deployment --quiet --binstubs"
+#https://github.com/bundler/bundler/blob/master/lib/bundler/deployment.rb
+#https://gist.github.com/chrismo/5043420/#comment-786623
+#Bundle flags to compatibility with Rails 3 and Rails 4 (binstubs)
+set :bundle_flags, "--deployment --quiet --binstubs .bundle/bin"
+
+#Load rbenv environment
 set :default_environment, {
   'PATH' => "$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH",
   'RBENV_VERSION' => '2.0.0-p247'
