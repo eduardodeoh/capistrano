@@ -45,13 +45,14 @@ load "config/capistrano/recipes/unicorn"
 load "config/capistrano/recipes/logrotate"
 load "config/capistrano/recipes/monit"
 
-#Uncomment #load 'deploy/assets' in Capfile
+#Pre-compile assets on vps server
+load 'deploy/assets'
 
 #Speed up assets pre-compile
 #load "config/capistrano/recipes/speed_up_assets"
 
-#Pre-compile assets locally instead on vps server
-load "config/capistrano/recipes/compile_assets_locally"
+#Pre-compile assets locally instead off vps server
+#load "config/capistrano/recipes/compile_assets_locally"
 
 
 #https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy.rb#L53
