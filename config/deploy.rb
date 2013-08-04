@@ -1,5 +1,7 @@
 #Main Capistrano Howto
 #https://gist.github.com/jrochkind/2161449
+#https://help.github.com/articles/deploying-with-capistrano
+#https://github.com/capistrano/capistrano/wiki/Capistrano-Tasks
 
 # Automatic "bundle install" after deploy
 require 'bundler/capistrano'
@@ -41,14 +43,19 @@ load "config/capistrano/recipes/nginx"
 load "config/capistrano/recipes/unicorn"
 load "config/capistrano/recipes/logrotate"
 load "config/capistrano/recipes/monit"
+
 #Uncomment #load 'deploy/assets' in Capfile
+
+#Speed up assets pre-compile
 #load "config/capistrano/recipes/speed_up_assets"
+
 #Pre-compile assets locally instead on vps server
 load "config/capistrano/recipes/compile_assets_locally"
 
 
 #https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy.rb#L53
 set :shared_children,   %w(public/system log tmp/pids tmp/sockets )
+
 #https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy/assets.rb#L11
 set :normalize_asset_timestamps, true
 
@@ -85,6 +92,12 @@ ssh_options[:forward_agent] = true
 # the application deployment path
 set :deploy_via, :remote_cache
 set :deploy_to, "#{rails_dir}/#{application}"
+
+#Set SCM(GIT) password
+#set :scm_passphrase, "password"
+
+#Git Submodules?
+set :git_enable_submodules, 1
 
 # how many releases should be kept in releases directory
 set :keep_releases, 3

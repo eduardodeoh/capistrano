@@ -4,15 +4,15 @@ upstream unicorn_<%= application %> {
 
 
 server {
-  server_name <%= nginx_domain_name %>;
-  return 301 $scheme://www.<%= nginx_domain_name %>$request_uri;
+  server_name www.<%= nginx_domain_name %>;
+  return 301 $scheme://<%= nginx_domain_name %>$request_uri;
 }
 
 
 server {
   #listen 80 default deferred;
   listen 80;
-  server_name www.<%= nginx_domain_name %>;
+  server_name <%= nginx_domain_name %>;
   root <%= current_path %>/public;
   access_log  /var/log/nginx/<%= application %>_access.log;
   error_log /var/log/nginx/<%= application %>_error.log;
