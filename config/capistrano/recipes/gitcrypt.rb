@@ -15,6 +15,7 @@ namespace :gitcrypt do
       run %Q{#{cmd}; git config filter.encrypt.smudge "gitcrypt smudge"}
       run %Q{#{cmd}; git config filter.encrypt.clean "gitcrypt clean"}
       run %Q{#{cmd}; git config diff.encrypt.textconv "gitcrypt diff"}
+      run "git reset --hard HEAD"
     else
       logger.info "File #{shared_path}/config/.gitcrypt exist. Skipping task..."
     end
