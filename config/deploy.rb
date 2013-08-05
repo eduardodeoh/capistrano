@@ -44,6 +44,7 @@ load "config/capistrano/recipes/nginx"
 load "config/capistrano/recipes/unicorn"
 load "config/capistrano/recipes/logrotate"
 load "config/capistrano/recipes/monit"
+load "config/capistrano/recipes/gitcrypt"
 
 #Pre-compile assets on vps server
 load 'deploy/assets'
