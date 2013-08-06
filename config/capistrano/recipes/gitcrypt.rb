@@ -1,5 +1,6 @@
 set_default(:gitcrypt_salt) { Capistrano::CLI.password_prompt "Type gitcrypt salt: " }
 set_default(:gitcrypt_password) { Capistrano::CLI.password_prompt "Type gitcrypt password: " }
+set_default(:gitcrypt_cipher, "aes-256-ebc")
 
 #https://github.com/shadowhand/git-encrypt/tree/master
 namespace :gitcrypt do
@@ -12,6 +13,7 @@ namespace :gitcrypt do
       cmd = "cd #{shared_path}/cached-copy"
       run "#{cmd}; git config gitcrypt.salt #{gitcrypt_salt}"
       run "#{cmd}; git config gitcrypt.pass #{gitcrypt_password}"
+      run "#{cmd}; git config gitcrypt.cipher #{gitcrypt_cipher}"
       run %Q{#{cmd}; git config filter.encrypt.smudge "gitcrypt smudge"}
       run %Q{#{cmd}; git config filter.encrypt.clean "gitcrypt clean"}
       run %Q{#{cmd}; git config diff.encrypt.textconv "gitcrypt diff"}
