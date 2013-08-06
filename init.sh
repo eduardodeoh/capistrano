@@ -1,4 +1,4 @@
-/usr/bin/env sh
+#!/usr/bin/env sh
 
 #Symlink files requested by Capistrano
 ln -nfs ../deploy/config/deploy.rb ../config
