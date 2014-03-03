@@ -1,6 +1,0 @@
-https://github.com/capistrano/capistrano/wiki/2.x-Multistage-Extension
-https://github.com/kalys/capistrano-nginx-unicorn
-https://github.com/capistrano/capistrano/wiki/Upgrading-to-Rails-4
-https://gist.github.com/mikhailov/3052776
-sudo apt-get install apticron
-http://plusbryan.com/my-first-5-minutes-on-a-server-or-essential-security-for-linux-servers

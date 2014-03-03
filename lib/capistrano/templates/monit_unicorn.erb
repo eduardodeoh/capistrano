@@ -1,0 +1,22 @@
+check process unicorn_<%= fetch(:application) %>_master 
+  with pidfile <%= fetch(:unicorn_pid) %>
+  start program = "/etc/init.d/unicorn_<%= fetch(:application) %> start"
+  stop program = "/etc/init.d/unicorn_<%= fetch(:application) %> stop"
+  if mem is greater than 300.0 MB for 1 cycles then restart       # eating up memory?
+  if cpu is greater than 50% for 2 cycles then alert                  # send an email to admin
+  if cpu is greater than 80% for 30 cycles then restart                # hung process?
+  group unicorn_<%= fetch(:application) %>
+
+<% fetch(:unicorn_workers).times do |n| %>
+  <% pid = fetch(:unicorn_pid).sub(".pid", ".#{n}.pid") %>
+  check process unicorn_<%= fetch(:application) %>_worker_<%= n %> 
+    with pidfile <%= pid %>
+    start program = "/bin/true"
+    stop program = "/usr/bin/test -s <%= fetch(:pid) %> && /bin/kill -QUIT `cat <%= pid %>`"
+    if mem > 350.0 MB for 1 cycles then restart #eating up memory?
+    if cpu > 80% for 30 cycles then restart
+    if 5 restarts within 5 cycles then timeout
+    alert <%= fetch(:monit_alert_email) %> only on { pid }
+    if changed pid 2 times within 60 cycles then alert
+    group unicorn_<%= fetch(:application) %>_workers
+<% end %>

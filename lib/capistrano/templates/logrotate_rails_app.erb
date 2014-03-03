@@ -1,0 +1,10 @@
+<%= fetch(:logrotate_rails_app_log) %> {
+  daily
+  missingok
+  rotate <%= fetch(:logrotate_rails_app_period) %>
+  dateext
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}

@@ -1,0 +1,73 @@
+upstream unicorn_<%= fetch(:application) %> {
+  server unix:<%= fetch(:unicorn_socket) %> fail_timeout=0;
+}
+
+server {
+  server_name www.<%= fetch(:nginx_domain_name) %>;
+  return 301 $scheme://<%= fetch(:nginx_domain_name) %>$request_uri;
+}
+
+
+server {
+  listen 80;
+  server_name <%= fetch(:nginx_domain_name) %>;
+  root <%= "#{current_path}/public" %>;
+  access_log  <%= "#{fetch(:nginx_log_path)}/#{fetch(:application)}_access.log" %> main;
+  error_log <%= "#{fetch(:nginx_log_path)}/#{fetch(:application)}_error.log" %> debug;
+
+  client_max_body_size 10M;
+  keepalive_timeout 10;
+
+  location ~ ^/(assets)/ {
+    gzip_static on;
+    expires max;
+    add_header Cache-Control public;
+  }
+
+  #For gem capistrano-maintenance
+  if (-f $document_root/system/maintenance.html) {
+    return 503;
+  }
+  error_page 503 @maintenance;
+  location @maintenance {
+    rewrite  ^(.*)$  /system/maintenance.html last;
+    break;
+  }
+
+
+  location ~ /private/(.*) {
+  internal;
+  alias <%= "#{shared_path}/uploads/$1" %>;
+}
+
+  location / {
+      try_files $uri/index.html $uri.html $uri @unicorn_<%= fetch(:application) %>;
+      error_page 404              /404.html;
+      error_page 422              /422.html;
+      error_page 500 502 503 504  /500.html;
+      error_page 403              /403.html;
+  }
+
+  location @unicorn_<%= fetch(:application) %> {
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-FORWARDED_PROTO $scheme;
+    proxy_redirect off;
+    proxy_set_header X-Sendfile-Type X-Accel-Redirect;
+    proxy_set_header X-Accel-Mapping "<%= releases_path %>/\d{14}/uploads/=/private/";
+
+    proxy_pass http://unicorn_<%= fetch(:application) %>;
+  }
+
+  location = /favicon.ico {
+    expires    max;
+    add_header Cache-Control public;
+  }
+
+  location ~ \.php$ {
+    deny all;
+  }
+
+}
+

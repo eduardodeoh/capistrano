@@ -1,118 +1,88 @@
-#Main Capistrano Howto
-#http://robmclarty.com/blog/how-to-deploy-a-rails-4-app-with-git-and-capistrano
-#https://gist.github.com/jrochkind/2161449
-#https://help.github.com/articles/deploying-with-capistrano
-#https://github.com/capistrano/capistrano/wiki/Capistrano-Tasks
+#Capistrano 3 Flow - Must Read
+#http://www.capistranorb.com/documentation/getting-started/flow/
 
-# Automatic "bundle install" after deploy
-require 'bundler/capistrano'
+### ALERT ####
+#DON'T PUT SECRET INFORMATION HERE#
 
-#https://github.com/bundler/bundler/blob/master/lib/bundler/deployment.rb
-#https://gist.github.com/chrismo/5043420/#comment-786623
-#Bundle flags to compatibility with Rails 3 and Rails 4 (binstubs)
-set :bundle_flags, "--deployment --quiet --binstubs .bundle/bin"
-
-#Load rbenv environment
-set :default_environment, {
-  'PATH' => "$HOME/.rbenv/shims:$HOME/.rbenv/bin:$PATH",
-  'RBENV_VERSION' => '2.0.0-p247'
-}
-
-#Load Capistrano General Settings
-load "config/capistrano/settings"
-
-#Load capistrano recipes....
-load "config/capistrano/recipes/helpers/methods"
-load "config/capistrano/recipes/vars/database"
-load "config/capistrano/recipes/vars/logrotate"
-load "config/capistrano/recipes/vars/monit"
-load "config/capistrano/recipes/vars/nginx"
-#load "config/capistrano/recipes/vars/secret_token"
-load "config/capistrano/recipes/vars/unicorn"
-load "config/capistrano/recipes/base"
-load "config/capistrano/recipes/ssh_agent"
-
-#Using vars file via gem dotenv-rails
-load "config/capistrano/recipes/dotenv"
-
-#Using vars file via rbenv-vars
-#load "config/capistrano/recipes/rbenv_vars"
-
-load "config/capistrano/recipes/database"
-##load "config/capistrano/recipes/secret_token"
-load "config/capistrano/recipes/nginx"
-load "config/capistrano/recipes/unicorn"
-load "config/capistrano/recipes/logrotate"
-load "config/capistrano/recipes/monit"
-load "config/capistrano/recipes/gitcrypt"
-
-#Pre-compile assets on vps server
-load 'deploy/assets'
-
-#Speed up assets pre-compile
-#load "config/capistrano/recipes/speed_up_assets"
-
-#Pre-compile assets locally instead off vps server
-#load "config/capistrano/recipes/compile_assets_locally"
+# config valid only for Capistrano 3.1
+lock 3.1
 
 
-#https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy.rb#L53
-set :shared_children,   %w(public/system log tmp/pids tmp/sockets )
+#Set Rbenv Environment - capistrano-rbenv
+#set :rbenv_ruby, '2.0.0-p353'
+set :rbenv_ruby, -> { File.read(".ruby-version").chomp }
+set :rbenv_type, :user # or :system, depends on your rbenv setup
 
-#https://github.com/capistrano/capistrano/blob/master/lib/capistrano/recipes/deploy/assets.rb#L11
-set :normalize_asset_timestamps, true
 
-# We have all components of the app on the same server
-server server_host, :app, :web, :db, :primary => true
+#Set Bundler - capistrano-bundler
+# set :bundle_gemfile, -> { release_path.join('Gemfile') }
+# set :bundle_dir, -> { shared_path.join('bundle') }
+# set :bundle_flags, '--deployment --quiet'
+# set :bundle_without, %w{development test}.join(' ')
+# set :bundle_binstubs, -> { shared_path.join('bin') }
+# set :bundle_roles, :all
+# set :bundle_bins, %w(gem rake ruby)
 
-#In situation having multiple servers
-#role :web, "192.241.194.15"
-#role :app, "192.241.194.15"
-#role :db, "192.241.194.15", primary: true #Primary database server for migrations
+# APPLICATION NAME
+set :application, "fpp"
 
-# Application environment
-set :rails_env, :production
+# Set deployer SSH user
+set :user, "deploy"
+
+# Deploy using git:
+set :git_user, "mygituser"
+set :git_repo_name, "mygitreponame"
+set :scm, "git"
+set :repo_url,  "git@github.com:#{fetch(:git_user)}/#{fetch(:git_repo_name)}.git"
+set :branch, "mygitbranch"
+#ask :branch, proc { `git rev-parse --abbrev-ref HEAD`.chomp }
+
+#Set Rails Apps Directory
+set :rails_dir, "/var/www/rails"
+set :deploy_to, "#{fetch(:rails_dir)}/#{fetch(:application)}"
+set :scm, :git
 
 # Run commands as sudoer ?
 set :use_sudo, false
 
-# the ssh port
-set :port, 22
-
-#Set Rails Apps Directory
-set :rails_dir, "/var/www/rails"
+set :format, :pretty
+set :log_level, :info
+#set :log_level, :debug
 
 # Must be set for the password prompt from git to work
-default_run_options[:pty] = true
+#set :pty, true
 
 #Capistrano forward my private keys for git
-ssh_options[:forward_agent] = true
+set :ssh_options, { forward_agent: true }
 
-#Default shell
-#default_run_options[:shell] = "/bin/bash"
+#set :linked_files, %w{config/database.yml}
+set :linked_dirs, %w{bin log tmp/pids tmp/cache tmp/sockets uploads}
 
-# Checkout, compress and send a local copy
-# the application deployment path
-set :deploy_via, :remote_cache
-set :deploy_to, "#{rails_dir}/#{application}"
-
-#Set SCM(GIT) password
-#set :scm_passphrase, "password"
-
-#Git Submodules?
-set :git_enable_submodules, 1
+#Default Enviroment for commands executed by SSHKit
+set :default_env, { path: "$HOME/.rbenv/shims:$PATH" }
 
 # how many releases should be kept in releases directory
-set :keep_releases, 3
+set :keep_releases, 5
 
-#Check migrations everty deploy
-after 'deploy:update_code', 'deploy:migrate'
+namespace :deploy do
 
-# Clean-up old releases
-after "deploy", "deploy:cleanup"
+  desc 'Restart application'
+  task :restart do
+    on roles(:app), in: :sequence, wait: 5 do
+      # Your restart mechanism here, for example:
+      # execute :touch, release_path.join('tmp/restart.txt')
+      Rake::Task["deploy:unicorn:restart"].invoke
+    end
+  end
+  after :publishing, :restart
 
-#ansible manages server bootstrap
-#rbenv manages rubies
-#bundler manages gems
-#capistrano manages deployments
-#monit monitors processes
+  after :restart, :clear_cache do
+    on roles(:web), in: :groups, limit: 3, wait: 10 do
+      # Here we can do anything such as:
+      # within release_path do
+      #   execute :rake, 'cache:clear'
+      # end
+    end
+  end
+  after :finishing, 'deploy:cleanup'
+end
