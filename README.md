@@ -1,18 +1,36 @@
-capistrano
+Capistrano 3.x
 ==========
 
-Capistrano recipes for Rails Apps
+Capistrano 3.x recipes for Rails Apps
 
 1 - First, check my pre-setup via ansible: https://github.com/eduardodeoh/ansible
 
-2 - git clone https://github.com/eduardodeoh/capistrano deploy
+2 - cd your_app_dir
 
-3 - check settings file - config/capistrano/settings.rb
+3 - git clone https://github.com/eduardodeoh/capistrano .
 
-4 - cd your_rails_app; ln -s deploy/Capfile;
+4 - check files:
+	- config/deploy/production.rb
+	- config/deploy/staging.rb
+	- config/deploy/shared/common_settings.rb
 
-5 - cd config; ln -s ../deploy/config/deploy.rb; ln -s ../deploy/config/capistrano; cd ..
+5 - Insert in your Gemfile
+	
+	#For Deploy
+	#https://github.com/capistrano/capistrano/blob/master/README.md
 
-6 - Verify files: config/deploy.rb and config/capistrano/var/*
+	gem 'capistrano', '~> 3.1'
+	
+	#https://github.com/capistrano/bundler
+	gem 'capistrano-bundler'
 
-7 - cap deploy:setup; cap deploy
+	#https://github.com/capistrano/rails
+	gem 'capistrano-rails'
+
+	#https://github.com/capistrano/rbenv
+	gem 'capistrano-rbenv', github: "capistrano/rbenv"
+
+	#https://github.com/capistrano/maintenance
+	#gem 'capistrano-maintenance', github: "capistrano/capistrano-maintenance"
+
+7 - bundle exec cap production deploy
